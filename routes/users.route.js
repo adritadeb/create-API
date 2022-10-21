@@ -40,4 +40,28 @@ router.post('/save', (req, res) => {
     res.send(parsedUsers);
 });
 
+router.delete('/delete/:id', (req, res) => {  
+    const { id } = req.params;     
+    const users = fs.readFileSync('users.json');
+    let parsedUsers = JSON.parse(users);
+    parsedUsers = parsedUsers.filter(user => user.id !== Number(id));
+    const newUsers = JSON.stringify(parsedUsers);
+    fs.writeFileSync("users.json", newUsers);
+    res.send(parsedUsers);
+});
+
+// router.patch('/update/:id', (req, res) => {       
+//     const { id } = req.params;
+//     const users = fs.readFileSync('users.json');
+//     const parsedUsers = JSON.parse(users);
+//     let findUser = parsedUsers.find(user => user.id === Number(id));
+//     findUser = req.body;
+//     // console.log(newUser)
+//     // const parsedUsers = JSON.parse(users);
+//     // parsedUsers.push(req.body);
+//     const newUser = JSON.stringify(findUser);
+//     fs.writeFileSync("users.json", newUser);
+//     res.send(newUser);
+// });
+
 module.exports = router;
