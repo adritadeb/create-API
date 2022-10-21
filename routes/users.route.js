@@ -25,19 +25,25 @@ const router = express.Router();
     // }
 // });
 
-router.get('/all', (req, res) => {       
+router.get('/all', (req, res) => {
+    const { limit } = req.query;  
     const users = fs.readFileSync('users.json');
-    const parsedUsers = JSON.parse(users);
+    const parsedUsers = JSON.parse(users).slice(0, limit);
     res.send(parsedUsers);
 });
 
 router.post('/save', (req, res) => {       
     const users = fs.readFileSync('users.json');
     const parsedUsers = JSON.parse(users);
-    parsedUsers.push(req.body);
-    const newUser = JSON.stringify(parsedUsers);
-    fs.writeFileSync("users.json", newUser);
-    res.send(parsedUsers);
+
+    if(Object.keys(parsedUsers[0]).every(user => Object.keys(req.body).includes(user))){
+        parsedUsers.push(req.body);
+        const newUser = JSON.stringify(parsedUsers);
+        fs.writeFileSync("users.json", newUser);
+        res.send(parsedUsers);
+    } else{
+        res.send('Please, give all fields');
+    }
 });
 
 router.delete('/delete/:id', (req, res) => {  
@@ -50,18 +56,22 @@ router.delete('/delete/:id', (req, res) => {
     res.send(parsedUsers);
 });
 
-// router.patch('/update/:id', (req, res) => {       
-//     const { id } = req.params;
-//     const users = fs.readFileSync('users.json');
-//     const parsedUsers = JSON.parse(users);
-//     let findUser = parsedUsers.find(user => user.id === Number(id));
-//     findUser = req.body;
-//     // console.log(newUser)
-//     // const parsedUsers = JSON.parse(users);
-//     // parsedUsers.push(req.body);
-//     const newUser = JSON.stringify(findUser);
-//     fs.writeFileSync("users.json", newUser);
-//     res.send(newUser);
-// });
+router.patch('/update/:id', (req, res) => {       
+    const { id } = req.params;
+    const users = fs.readFileSync('users.json');
+    const parsedUsers = JSON.parse(users);
+    for(let user of parsedUsers){
+        if(user.id == id){
+            let index = parsedUsers.indexOf(user);
+            if (index !== -1) {
+                parsedUsers[index] = req.body;
+                console.log(parsedUsers)
+                fs.writeFileSync("users.json", JSON.stringify(parsedUsers));
+                res.send(parsedUsers);
+            }
+        } 
+    }
+    res.send('');
+});
 
 module.exports = router;
