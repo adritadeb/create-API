@@ -3,27 +3,13 @@ const fs = require('fs');
 
 const router = express.Router();
 
-// router.get('/random', (req, res) => {       
-//     const users = fs.readFileSync('users.json');
-//     const parsedUsers = JSON.parse(users);
-//     let randomUsers = [];
-//     let count = 0;
-//     for(let i = 0; i < parsedUsers.length; i++){ 
-//         randomUsers.push(parsedUsers[i]);
-//     };
-//     randomUsers.forEach(user => {
-//         console.log(user)
-//         // res.send(user);
-//         count++;
-//         if(count++){
-//             res.end();
-
-//         }
-//     });
-    // for(let i = parsedUsers.length; i < parsedUsers.length; i--){
-    //     console.log(i)
-    // }
-// });
+router.get('/random', (req, res) => {       
+    const users = fs.readFileSync('users.json');
+    const parsedUsers = JSON.parse(users);
+    const index = Math.floor(Math.random() * (parsedUsers.length - 0)) + 1;
+    const random = parsedUsers[index];
+    res.send(random);
+});
 
 router.get('/all', (req, res) => {
     const { limit } = req.query;  
@@ -65,12 +51,33 @@ router.patch('/update/:id', (req, res) => {
             let index = parsedUsers.indexOf(user);
             if (index !== -1) {
                 parsedUsers[index] = req.body;
-                console.log(parsedUsers)
                 fs.writeFileSync("users.json", JSON.stringify(parsedUsers));
                 res.send(parsedUsers);
             }
         } 
     }
+    res.send('');
+});
+
+router.patch('/bulk-update', (req, res) => {
+    const users = fs.readFileSync('users.json');
+    const parsedUsers = JSON.parse(users);
+    parsedUsers.forEach(user => {
+        req.query.ids.forEach(id => {
+            if(user.id == id){
+                let index = parsedUsers.indexOf(user);
+                req.body.forEach(u => {
+                   if(user.id == u.id){
+                    if (index !== -1) {
+                        parsedUsers[index] = u;
+                        fs.writeFileSync("users.json", JSON.stringify(parsedUsers));
+                        res.send(parsedUsers);
+                    }
+                   }
+                })
+            } 
+        })        
+    });
     res.send('');
 });
 
